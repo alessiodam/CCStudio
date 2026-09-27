@@ -1,0 +1,31 @@
+name: Question or setup help
+description: "Ask how to use or set up CC: Studio"
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The [README](https://github.com/alessiodam/CCStudio#readme) covers the configuration and every way to let players connect, so check it first.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What are you trying to do, and what have you tried so far?
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: How do browsers reach the editor?
+      options:
+        - Default (localhost)
+        - Plain HTTP on a server
+        - Built-in Cloudflare Tunnel
+        - Reverse proxy
+        - Built-in HTTPS
+        - Not sure
+  - type: input
+    id: versions
+    attributes:
+      label: "CC: Studio, Minecraft, NeoForge and CC: Tweaked versions"
+      placeholder: "CC: Studio 1.0.0, Minecraft 1.21.1, NeoForge 21.1.250, CC: Tweaked 1.120.2"

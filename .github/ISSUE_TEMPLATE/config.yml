@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/alessiodam/CCStudio/security/advisories/new
+    about: Report security problems privately so they can be fixed before they're made public.
