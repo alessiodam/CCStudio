@@ -1,0 +1,203 @@
+{
+  "name": "ccstudio",
+  "displayName": "CC: Studio",
+  "description": "Edit, run and control CC: Tweaked computers from VS Code.",
+  "version": "1.0.0",
+  "publisher": "alessiodam",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "browser": "./dist/extension.js",
+  "activationEvents": [
+    "onFileSystem:ccstudio",
+    "onStartupFinished"
+  ],
+  "enabledApiProposals": [
+    "fileSearchProvider",
+    "textSearchProvider"
+  ],
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "ccstudio.run",
+        "title": "Run on Computer",
+        "category": "CC: Studio",
+        "icon": "$(play)"
+      },
+      {
+        "command": "ccstudio.runFile",
+        "title": "Run on Computer",
+        "category": "CC: Studio",
+        "icon": "$(play)"
+      },
+      {
+        "command": "ccstudio.terminate",
+        "title": "Terminate Running Program",
+        "category": "CC: Studio",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "ccstudio.reboot",
+        "title": "Reboot Computer",
+        "category": "CC: Studio",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "ccstudio.shutdown",
+        "title": "Shut Down Computer",
+        "category": "CC: Studio",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "ccstudio.turnOn",
+        "title": "Turn On Computer",
+        "category": "CC: Studio",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "ccstudio.showTerminal",
+        "title": "Show Computer Terminal",
+        "category": "CC: Studio",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "ccstudio.sendCtrl",
+        "title": "Press Ctrl on Computer",
+        "category": "CC: Studio"
+      },
+      {
+        "command": "ccstudio.actions",
+        "title": "Computer Actions",
+        "category": "CC: Studio"
+      },
+      {
+        "command": "ccstudio.reconnect",
+        "title": "Reconnect to Computer",
+        "category": "CC: Studio"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ccstudio.run",
+          "when": "resourceScheme == ccstudio && editorLangId == lua",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ccstudio.runFile",
+          "when": "resourceScheme == ccstudio && !explorerResourceIsFolder",
+          "group": "ccstudio@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "ccstudio.runFile",
+          "when": "false"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "ccstudio.run",
+        "key": "f5",
+        "when": "resourceScheme == ccstudio && !terminalFocus"
+      },
+      {
+        "command": "ccstudio.terminate",
+        "key": "shift+f5",
+        "when": "!terminalFocus"
+      },
+      {
+        "command": "ccstudio.reboot",
+        "key": "ctrl+shift+f5",
+        "mac": "cmd+shift+f5",
+        "when": "!terminalFocus"
+      },
+      {
+        "command": "ccstudio.showTerminal",
+        "key": "ctrl+`",
+        "mac": "ctrl+`",
+        "when": "!terminalFocus"
+      }
+    ],
+    "languages": [
+      {
+        "id": "lua",
+        "filenames": [
+          "startup"
+        ]
+      }
+    ],
+    "terminal": {
+      "profiles": [
+        {
+          "id": "ccstudio.terminal",
+          "title": "Computer",
+          "icon": "vm"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "CC: Studio",
+      "properties": {
+        "ccstudio.terminal.showOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the computer's terminal when the editor opens."
+        },
+        "ccstudio.terminal.mouse": {
+          "type": "boolean",
+          "default": true,
+          "description": "Forward mouse clicks, drags and scrolling in the terminal to advanced computers. Hold Shift to select text while this is on."
+        },
+        "ccstudio.run.saveBeforeRun": {
+          "type": "boolean",
+          "default": true,
+          "description": "Save the file before running it on the computer."
+        },
+        "ccstudio.run.showTerminal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the computer's terminal when running a program."
+        },
+        "ccstudio.lua.extensionlessFilesAsLua": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open files without an extension as Lua, like ComputerCraft does."
+        },
+        "ccstudio.lua.diagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Report Lua syntax errors while typing."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "luaparse": "0.3.1"
+  },
+  "devDependencies": {
+    "@types/luaparse": "0.2.13",
+    "@types/vscode": "1.100.0",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

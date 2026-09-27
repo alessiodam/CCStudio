@@ -1,0 +1,56 @@
+import dev.alessiodam.ccstudio.gradle.BuildExtension
+
+plugins {
+    id 'java-library'
+}
+
+group = property('mod_group_id')
+version = property('mod_version')
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(property('common_java_version').toString()))
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly "io.netty:netty-codec-http:${property('common_netty_version')}"
+    compileOnly "com.google.code.gson:gson:${property('common_gson_version')}"
+    compileOnly "org.slf4j:slf4j-api:${property('common_slf4j_version')}"
+    compileOnly "org.jspecify:jspecify:${property('jspecify_version')}"
+}
+
+def extensionDirectory = layout.settingsDirectory.dir('extension')
+
+def buildExtension = tasks.register('buildExtension', BuildExtension) {
+    group = 'build'
+    description = 'Builds the browser extension that is bundled with the mod.'
+    extensionDir = extensionDirectory
+    sources.from(extensionDirectory.asFileTree.matching {
+        include 'src/**', 'data/**', 'package.json', 'bun.lock', 'package-lock.json', 'tsconfig.json', 'build.mjs'
+    })
+    packageManager = providers.gradleProperty('extension_package_manager').orElse('auto')
+    outputDir = layout.buildDirectory.dir('generated/extension')
+}
+
+sourceSets.main.resources.srcDir(buildExtension)
+
+configurations {
+    commonJava {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+    commonResources {
+        canBeConsumed = true
+        canBeResolved = false
+    }
+}
+
+artifacts {
+    commonJava(file('src/main/java'))
+    commonResources(tasks.named('processResources', ProcessResources).map { it.destinationDir })
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

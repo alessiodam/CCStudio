@@ -1,0 +1,102 @@
+name: Versions
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  update:
+    name: Update dependency versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+
+      - name: Bump NeoForge, CC: Tweaked, Parchment and ModDevGradle
+        id: bump
+        run: |
+          python3 scripts/versions.py update | tee versions.log
+          if git diff --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/setup-java@v6
+        if: steps.bump.outputs.changed == 'true'
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: oven-sh/setup-bun@v2
+        if: steps.bump.outputs.changed == 'true'
+
+      - uses: gradle/actions/setup-gradle@v6
+        if: steps.bump.outputs.changed == 'true'
+
+      - name: Build with the new versions
+        if: steps.bump.outputs.changed == 'true'
+        run: ./gradlew build
+
+      - name: Prepare the pull request body
+        if: steps.bump.outputs.changed == 'true'
+        run: |
+          {
+            echo "Automated version bump. Every platform was built successfully with these versions."
+            echo
+            echo '```'
+            cat versions.log
+            echo '```'
+          } > pr-body.md
+          rm versions.log
+
+      - uses: peter-evans/create-pull-request@v8
+        if: steps.bump.outputs.changed == 'true'
+        with:
+          branch: automation/update-versions
+          delete-branch: true
+          commit-message: Update NeoForge, CC Tweaked and tooling versions
+          title: Update NeoForge, CC Tweaked and tooling versions
+          body-path: pr-body.md
+          add-paths: |
+            platforms/*/gradle.properties
+            build-logic/gradle.properties
+
+  new-minecraft:
+    name: Report newer Minecraft versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+
+      - name: Open or update the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          versions="$(python3 scripts/versions.py check --json | python3 -c 'import json, sys; print(" ".join(json.load(sys.stdin)))')"
+          if [ -z "$versions" ]; then
+            echo "No newer Minecraft version can be supported yet"
+            exit 0
+          fi
+          title="Newer Minecraft versions can be supported"
+          {
+            echo "NeoForge and CC: Tweaked both have releases for these Minecraft versions, but CC: Studio does not support them yet:"
+            echo
+            for version in $versions; do echo "- $version"; done
+            echo
+            echo "To add one, run \`python3 scripts/versions.py new <version>\`, then \`./gradlew build\` and fix any compile errors in the new platform folder. See the README for details."
+          } > issue-body.md
+          number="$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')"
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file issue-body.md
+          else
+            gh issue create --title "$title" --body-file issue-body.md
+          fi

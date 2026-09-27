@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	<meta name="referrer" content="no-referrer">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<title>{{TITLE}}</title>
+	<link rel="icon" href="{{VSCODE_BASE}}/favicon.ico" type="image/x-icon">
+	<link rel="stylesheet" href="{{VSCODE_BASE}}/out/vs/workbench/workbench.web.main.internal.css">
+	<script id="ccstudio-config" type="application/json">{{CONFIG}}</script>
+</head>
+<body aria-label=""></body>
+<script>
+	globalThis._VSCODE_FILE_ROOT = new URL('{{VSCODE_BASE}}/out/', window.location.href).toString();
+</script>
+<script src="{{VSCODE_BASE}}/out/nls.messages.js"></script>
+<script type="module">
+	const studio = JSON.parse(document.getElementById('ccstudio-config').textContent);
+	const base = new URL(studio.vscodeBase + '/', window.location.href);
+	const { create, URI } = await import(new URL('out/vs/workbench/workbench.web.main.internal.js', base).href);
+
+	const extension = new URL('extension', window.location.href);
+	const folderUri = URI.from({ scheme: 'ccstudio', authority: studio.authority, path: '/' + studio.root });
+
+	const productConfiguration = {
+		nameShort: 'CC: Studio',
+		nameLong: 'CC: Studio',
+		applicationName: 'ccstudio',
+		enableTelemetry: false,
+		webEndpointUrlTemplate: '',
+		chatParticipantRegistry: undefined,
+		emergencyAlertUrl: undefined,
+		mcpUrl: undefined,
+		profileTemplatesUrl: undefined,
+		extensionEnabledApiProposals: {
+			'alessiodam.ccstudio': ['fileSearchProvider', 'textSearchProvider']
+		}
+	};
+	if (studio.openVsx) {
+		productConfiguration.extensionsGallery = {
+			serviceUrl: 'https://open-vsx.org/vscode/gallery',
+			itemUrl: 'https://open-vsx.org/vscode/item',
+			resourceUrlTemplate: 'https://open-vsx.org/vscode/unpkg/{publisher}/{name}/{version}/{path}',
+			extensionUrlTemplate: 'https://open-vsx.org/vscode/gallery/{publisher}/{name}/latest',
+			controlUrl: '',
+			nlsBaseUrl: '',
+			publisherUrl: ''
+		};
+	} else {
+		productConfiguration.extensionsGallery = undefined;
+	}
+
+	create(document.body, {
+		workspaceProvider: {
+			workspace: { folderUri },
+			trusted: true,
+			payload: undefined,
+			open: async () => false
+		},
+		additionalBuiltinExtensions: [
+			URI.from({ scheme: extension.protocol.slice(0, -1), authority: extension.host, path: extension.pathname })
+		],
+		productConfiguration,
+		configurationDefaults: {
+			'workbench.startupEditor': 'none',
+			'workbench.enableExperiments': false,
+			'workbench.tips.enabled': false,
+			'security.workspace.trust.enabled': false,
+			'telemetry.telemetryLevel': 'off',
+			'update.mode': 'none',
+			'extensions.autoCheckUpdates': false,
+			'chat.disableAIFeatures': true,
+			'files.eol': '\n',
+			'terminal.integrated.minimumContrastRatio': 1,
+			'terminal.integrated.drawBoldTextInBrightColors': false,
+			'terminal.integrated.customGlyphs': true,
+			'terminal.integrated.cursorStyle': 'underline',
+			'terminal.integrated.cursorBlinking': true,
+			'terminal.integrated.enablePersistentSessions': false,
+			'terminal.integrated.tabs.enabled': true
+		},
+		windowIndicator: {
+			label: '$(vm) ' + studio.title,
+			tooltip: studio.title + ' - CC: Studio ' + studio.version
+		},
+		initialColorTheme: { themeType: 'dark' }
+	});
+</script>
+</html>

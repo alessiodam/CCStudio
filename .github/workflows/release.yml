@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the tag matches mod_version
+        run: |
+          version="$(grep '^mod_version=' gradle.properties | cut -d= -f2)"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match mod_version $version in gradle.properties"
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build every platform
+        run: ./gradlew build
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" platforms/*/build/libs/*.jar --title "CC: Studio $GITHUB_REF_NAME" --generate-notes

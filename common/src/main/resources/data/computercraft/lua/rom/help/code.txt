@@ -1,0 +1,12 @@
+code opens this computer in a full VS Code editor that runs in your web browser. From there you can edit files, use the live terminal, run programs and turn the computer on or off.
+
+Every browser has to be approved from the computer first. Opening the link shows a code; run "code trust <code>" here to allow that browser. Only approve codes you see in your own browser.
+
+ex:
+"code" starts an editor session and prints its link. Players looking at the computer's screen also get a clickable link in chat.
+"code trust" lists the browsers waiting for approval.
+"code trust ABCD-EFGH" approves the browser showing that code.
+"code status" shows the link of the current session.
+"code stop" ends the session and revokes every approved browser.
+
+A session also ends by itself after a while when no browser is connected to it.

@@ -1,0 +1,149 @@
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'net.neoforged.moddev'
+}
+
+def prop = { String name -> property(name).toString() }
+def modId = prop('mod_id')
+def gameVersion = prop('minecraft_version')
+
+group = prop('mod_group_id')
+version = prop('mod_version')
+base.archivesName = "${modId}-neoforge-${gameVersion}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(prop('java_version')))
+
+repositories {
+    maven {
+        name = 'SquidDev'
+        url = 'https://maven.squiddev.cc'
+        content {
+            includeGroup 'cc.tweaked'
+        }
+    }
+}
+
+neoForge {
+    version = prop('neo_version')
+
+    if (findProperty('parchment_mappings_version')?.toString()) {
+        parchment {
+            mappingsVersion = prop('parchment_mappings_version')
+            minecraftVersion = prop('parchment_minecraft_version')
+        }
+    }
+
+    runs {
+        client {
+            client()
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${modId}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+configurations {
+    commonJava {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+    commonResources {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    compileOnly project(':common')
+    commonJava project(path: ':common', configuration: 'commonJava')
+    commonResources project(path: ':common', configuration: 'commonResources')
+
+    def cct = "cc.tweaked:cc-tweaked-${gameVersion}"
+    def cctVersion = prop('cc_tweaked_version')
+    compileOnly "${cct}-core-api:${cctVersion}"
+    compileOnly "${cct}-common-api:${cctVersion}"
+    compileOnly "${cct}-${prop('cc_tweaked_loader')}-api:${cctVersion}"
+    compileOnly("${cct}-core:${cctVersion}") {
+        transitive = false
+    }
+    compileOnly("${cct}-common:${cctVersion}") {
+        transitive = false
+    }
+    runtimeOnly "${cct}-${prop('cc_tweaked_loader')}:${cctVersion}"
+    compileOnly "org.jspecify:jspecify:${prop('jspecify_version')}"
+
+    if (prop('bundle_netty_http').toBoolean()) {
+        def nettyVersion = prop('netty_version')
+        def nettyParts = nettyVersion.tokenize('.')
+        def nettyLimit = "${nettyParts[0]}.${(nettyParts[1] as int) + 1}"
+        jarJar(implementation('io.netty:netty-codec-http')) {
+            transitive = false
+            version {
+                strictly "[${nettyVersion},${nettyLimit})"
+                prefer nettyVersion
+            }
+        }
+        additionalRuntimeClasspath("io.netty:netty-codec-http:${nettyVersion}") {
+            transitive = false
+        }
+    }
+}
+
+tasks.named('compileJava', JavaCompile) {
+    dependsOn configurations.commonJava
+    source configurations.commonJava
+}
+
+tasks.named('processResources', ProcessResources) {
+    dependsOn configurations.commonResources
+    from configurations.commonResources
+}
+
+def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    def replaceProperties = [
+            minecraft_version       : gameVersion,
+            minecraft_version_range : prop('minecraft_version_range'),
+            neo_version_range       : prop('neo_version_range'),
+            loader_version_range    : prop('loader_version_range'),
+            cc_tweaked_version_range: prop('cc_tweaked_version_range'),
+            mod_id                  : modId,
+            mod_name                : prop('mod_name'),
+            mod_license             : prop('mod_license'),
+            mod_version             : prop('mod_version'),
+            mod_authors             : prop('mod_authors'),
+            mod_description         : prop('mod_description'),
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into layout.buildDirectory.dir('generated/sources/modMetadata')
+}
+
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
