@@ -29,6 +29,7 @@ def buildExtension = tasks.register('buildExtension', BuildExtension) {
     sources.from(extensionDirectory.asFileTree.matching {
         include 'src/**', 'data/**', 'package.json', 'bun.lock', 'package-lock.json', 'tsconfig.json', 'build.mjs'
     })
+    sources.from(layout.projectDirectory.file('src/main/resources/ccstudio/logo.png'))
     packageManager = providers.gradleProperty('extension_package_manager').orElse('auto')
     outputDir = layout.buildDirectory.dir('generated/extension')
 }

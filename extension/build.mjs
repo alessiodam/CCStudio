@@ -26,4 +26,5 @@ await build({
 });
 
 await copyFile(path.join(root, 'package.json'), path.join(target, 'package.json'));
+await copyFile(path.join(root, '..', 'common', 'src', 'main', 'resources', 'ccstudio', 'logo.png'), path.join(target, 'icon.png'));
 await writeFile(path.join(target, 'package.nls.json'), '{}\n');

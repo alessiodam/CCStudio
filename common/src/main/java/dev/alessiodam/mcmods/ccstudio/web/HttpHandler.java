@@ -111,7 +111,7 @@ final class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
         if (segments.isEmpty()) return landing(ctx, request);
         return switch (segments.getFirst()) {
-            case "favicon.ico" -> segments.size() == 1 ? vscodeFile(ctx, request, "favicon.ico") : notFound(ctx, request);
+            case "favicon.ico", "logo.png" -> segments.size() == 1 ? staticFile(ctx, request, resources.logo()) : notFound(ctx, request);
             case "vscode" -> vscode(ctx, request, segments);
             case "s" -> session(ctx, request, path, segments);
             default -> notFound(ctx, request);
@@ -138,7 +138,7 @@ final class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             if (!isTrusted(request, session)) return notFound(ctx, request);
             var file = resources.extensionFile(String.join("/", segments.subList(3, segments.size())));
             if (file == null) return notFound(ctx, request);
-            return Responses.bytes(ctx, request, file.data(), file.gzipped(), file.contentType(), file.etag());
+            return staticFile(ctx, request, file);
         }
         return notFound(ctx, request);
     }
@@ -168,6 +168,7 @@ final class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private ChannelFuture pairingPage(ChannelHandlerContext ctx, FullHttpRequest request, Session session, Pairing pairing, List<String> cookies) {
         return Responses.html(ctx, request, HttpResponseStatus.OK, resources.pairing(Map.of(
                 "TITLE", WebResources.escape("Trust this browser - CC: Studio"),
+                "LOGO", logoUrl(request),
                 "COMPUTER", WebResources.escape(session.title()),
                 "COMMAND", WebResources.escape("code trust " + pairing.code())
         )), cookies);
@@ -205,6 +206,7 @@ final class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         cookies.add(cookie(ASSET_COOKIE + session.computerId(), session.assetToken(), "/", -1, request));
         return Responses.html(ctx, request, HttpResponseStatus.OK, resources.workbench(Map.of(
                 "TITLE", WebResources.escape(session.title() + " - CC: Studio"),
+                "LOGO", logoUrl(request),
                 "VSCODE_BASE", "../../vscode/" + key,
                 "CONFIG", Json.writeHtmlSafe(workbenchConfig(session, key))
         )), cookies);
@@ -305,6 +307,16 @@ final class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         return null;
     }
 
+    private static ChannelFuture staticFile(ChannelHandlerContext ctx, FullHttpRequest request, WebResources.StaticFile file) {
+        return Responses.bytes(ctx, request, file.data(), file.gzipped(), file.contentType(), file.etag());
+    }
+
+    private static String logoUrl(FullHttpRequest request) {
+        var path = new QueryStringDecoder(request.uri()).path();
+        var depth = (int) path.chars().filter(ch -> ch == '/').count() - 1;
+        return "../".repeat(Math.max(depth, 0)) + "logo.png";
+    }
+
     private static String sessionPath(Session session) {
         return "/s/" + session.token() + "/";
     }
@@ -343,6 +355,7 @@ final class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private ChannelFuture page(ChannelHandlerContext ctx, FullHttpRequest request, HttpResponseStatus status, String heading, String message, String detail, boolean refresh, List<String> cookies) {
         return Responses.html(ctx, request, status, resources.page(Map.of(
                 "TITLE", WebResources.escape(heading + " - CC: Studio"),
+                "LOGO", logoUrl(request),
                 "HEADING", WebResources.escape(heading),
                 "MESSAGE", message,
                 "DETAIL", detail,

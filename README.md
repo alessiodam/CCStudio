@@ -1,3 +1,5 @@
+<img src="common/src/main/resources/ccstudio/logo.png" alt="CC: Studio logo" width="128" align="right">
+
 # CC: Studio
 
 A NeoForge 1.21.1 addon for CC: Tweaked that opens any computer in a full VS Code editor running in your browser.
@@ -22,21 +24,21 @@ Type `code` on a computer (or turtle, or pocket computer). The mod prints a link
 
 Settings live in `config/ccstudio-common.toml`.
 
-| Setting | Default | Notes |
-| --- | --- | --- |
-| `web.bindAddress` | `127.0.0.1` | Use `0.0.0.0` so other machines can connect |
-| `web.port` | `8765` | |
-| `web.publicUrl` | empty | Base URL used in links, e.g. `https://studio.example.com` |
-| `web.maxConnections` | `256` | Maximum simultaneous HTTP and WebSocket connections |
-| `tls.enabled` | `false` | Serve HTTPS directly |
-| `tls.certificate` / `tls.privateKey` / `tls.password` | empty | PEM chain + PKCS#8 key, or a `.p12`/`.pfx` keystore |
-| `tunnel.cloudflareToken` | empty | Cloudflare Tunnel token. When set, the server runs `cloudflared` for you |
-| `tunnel.cloudflaredPath` | empty | Use an installed `cloudflared` instead of the bundled download |
-| `sessions.*` | | Session limits, idle timeout, chat links, `/rom` visibility |
-| `sessions.maxLifetimeHours` | `12` | Sessions end after this long even with a browser connected |
-| `sessions.allowCommandComputers` | `false` | Command computers can run server commands, so they are off by default |
-| `vscode.downloadUrl` / `vscode.sha256` | pinned 1.139.1 | Change these to use another VS Code Web build |
-| `vscode.openVsx` | `true` | Lets the editor install web extensions from open-vsx.org |
+| Setting                                               | Default        | Notes                                                                    |
+|-------------------------------------------------------|----------------|--------------------------------------------------------------------------|
+| `web.bindAddress`                                     | `127.0.0.1`    | Use `0.0.0.0` so other machines can connect                              |
+| `web.port`                                            | `8765`         |                                                                          |
+| `web.publicUrl`                                       | empty          | Base URL used in links, e.g. `https://studio.example.com`                |
+| `web.maxConnections`                                  | `256`          | Maximum simultaneous HTTP and WebSocket connections                      |
+| `tls.enabled`                                         | `false`        | Serve HTTPS directly                                                     |
+| `tls.certificate` / `tls.privateKey` / `tls.password` | empty          | PEM chain + PKCS#8 key, or a `.p12`/`.pfx` keystore                      |
+| `tunnel.cloudflareToken`                              | empty          | Cloudflare Tunnel token. When set, the server runs `cloudflared` for you |
+| `tunnel.cloudflaredPath`                              | empty          | Use an installed `cloudflared` instead of the bundled download           |
+| `sessions.*`                                          |                | Session limits, idle timeout, chat links, `/rom` visibility              |
+| `sessions.maxLifetimeHours`                           | `12`           | Sessions end after this long even with a browser connected               |
+| `sessions.allowCommandComputers`                      | `false`        | Command computers can run server commands, so they are off by default    |
+| `vscode.downloadUrl` / `vscode.sha256`                | pinned 1.139.1 | Change these to use another VS Code Web build                            |
+| `vscode.openVsx`                                      | `true`         | Lets the editor install web extensions from open-vsx.org                 |
 
 ### Access modes
 

@@ -13,25 +13,22 @@ import java.util.regex.Pattern;
 
 final class WebResources {
     private static final String ROOT = "/ccstudio/web/";
-    private static final String[] EXTENSION_FILES = { "package.json", "package.nls.json", "dist/extension.js" };
+    private static final String LOGO = "/ccstudio/logo.png";
+    private static final String[] EXTENSION_FILES = { "package.json", "package.nls.json", "dist/extension.js", "icon.png" };
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\{([A-Z_]+)}}");
 
     private final String workbench;
     private final String page;
     private final String pairing;
+    private final StaticFile logo;
     private final Map<String, StaticFile> extensionFiles = new HashMap<>();
 
     WebResources(String version) {
         workbench = text("workbench.html");
         page = text("page.html");
         pairing = text("pair.html");
-        for (var name : EXTENSION_FILES) {
-            var data = bytes("extension/" + name);
-            if (data == null) throw new IllegalStateException("Missing web resource extension/" + name);
-            var type = MimeTypes.of(name);
-            var etag = "\"" + version + "-" + data.length + "-" + Integer.toHexString(Arrays.hashCode(data)) + "\"";
-            extensionFiles.put(name, new StaticFile(data, GzipCache.compress(data, type), type, etag));
-        }
+        logo = staticFile(LOGO, version);
+        for (var name : EXTENSION_FILES) extensionFiles.put(name, staticFile(ROOT + "extension/" + name, version));
     }
 
     String workbench(Map<String, String> values) {
@@ -44,6 +41,10 @@ final class WebResources {
 
     String pairing(Map<String, String> values) {
         return render(pairing, values);
+    }
+
+    StaticFile logo() {
+        return logo;
     }
 
     @Nullable StaticFile extensionFile(String relative) {
@@ -76,14 +77,22 @@ final class WebResources {
         return result.toString();
     }
 
+    private static StaticFile staticFile(String path, String version) {
+        var data = bytes(path);
+        if (data == null) throw new IllegalStateException("Missing web resource " + path);
+        var type = MimeTypes.of(path);
+        var etag = "\"" + version + "-" + data.length + "-" + Integer.toHexString(Arrays.hashCode(data)) + "\"";
+        return new StaticFile(data, GzipCache.compress(data, type), type, etag);
+    }
+
     private static String text(String name) {
-        var data = bytes(name);
+        var data = bytes(ROOT + name);
         if (data == null) throw new IllegalStateException("Missing web resource " + name);
         return new String(data, StandardCharsets.UTF_8);
     }
 
-    private static byte @Nullable [] bytes(String name) {
-        try (var stream = WebResources.class.getResourceAsStream(ROOT + name)) {
+    private static byte @Nullable [] bytes(String path) {
+        try (var stream = WebResources.class.getResourceAsStream(path)) {
             return stream == null ? null : stream.readAllBytes();
         } catch (IOException e) {
             throw new UncheckedIOException(e);

@@ -4,6 +4,7 @@
   "description": "Edit, run and control CC: Tweaked computers from VS Code.",
   "version": "1.0.0",
   "publisher": "alessiodam",
+  "icon": "icon.png",
   "license": "UNLICENSED",
   "private": true,
   "engines": {
