@@ -36,4 +36,5 @@ jobs:
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" platforms/*/build/libs/*.jar --title "CC: Studio $GITHUB_REF_NAME" --generate-notes
+        run: |
+          gh release create "$GITHUB_REF_NAME" platforms/*/build/libs/*.jar --title "CC: Studio $GITHUB_REF_NAME" --generate-notes

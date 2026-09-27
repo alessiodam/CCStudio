@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Bump NeoForge, CC: Tweaked, Parchment and ModDevGradle
+      - name: "Bump NeoForge, CC: Tweaked, Parchment and ModDevGradle"
         id: bump
         run: |
           python3 scripts/versions.py update | tee versions.log
