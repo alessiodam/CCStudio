@@ -2,7 +2,7 @@
 
 # CC: Studio
 
-A NeoForge 1.21.1 addon for CC: Tweaked that opens any computer in a full VS Code editor running in your browser.
+A NeoForge addon for CC: Tweaked that opens any computer in a full VS Code editor running in your browser.
 
 Type `code` on a computer (or turtle, or pocket computer). The mod prints a link and, if you are looking at the screen, sends it to you in chat as well. The first time a browser opens the link it shows a code such as `code trust 7KQ4-M2XP`; run that on the computer to approve the browser. After that the link gives you:
 
@@ -16,7 +16,10 @@ Type `code` on a computer (or turtle, or pocket computer). The mod prints a link
 
 ## Requirements
 
-- Minecraft 1.21.1, NeoForge 21.1.250+, CC: Tweaked 1.120.2+
+- One of:
+  - Minecraft 1.21.1, NeoForge 21.1.264+, CC: Tweaked 1.120.2+
+  - Minecraft 1.21.11, NeoForge 21.11.48+, CC: Tweaked 1.117.1+
+  - Minecraft 26.2, NeoForge 26.2.0.93+, CC: Tweaked 1.120.2+
 - The server needs internet access once. It downloads the official VS Code Web build (about 53 MB), checks its SHA-256 and caches it in `<game dir>/ccstudio/vscode-web`.
 - Only the server needs the mod. Clients without it can still join.
 
