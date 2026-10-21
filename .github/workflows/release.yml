@@ -38,3 +38,30 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" platforms/*/build/libs/*.jar --title "CC: Studio $GITHUB_REF_NAME" --generate-notes
+
+      - name: Publish to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT: dL1sDnKD
+          CC_TWEAKED_PROJECT: gu7yAYhd
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          for platform in platforms/*/; do
+            minecraft="$(grep '^minecraft_version=' "$platform/gradle.properties" | cut -d= -f2)"
+            jar="$(ls "$platform"build/libs/*.jar)"
+            data="$(jq -n \
+              --arg project "$MODRINTH_PROJECT" \
+              --arg dependency "$CC_TWEAKED_PROJECT" \
+              --arg number "$version+$minecraft" \
+              --arg name "CC: Studio $version for $minecraft" \
+              --arg minecraft "$minecraft" \
+              --arg changelog "https://github.com/$GITHUB_REPOSITORY/releases/tag/$GITHUB_REF_NAME" \
+              '{project_id: $project, version_number: $number, name: $name, changelog: $changelog,
+                game_versions: [$minecraft], loaders: ["neoforge"], version_type: "release", featured: true,
+                dependencies: [{project_id: $dependency, dependency_type: "required"}], file_parts: ["file"]}')"
+            curl --fail-with-body -sS https://api.modrinth.com/v2/version \
+              -H "Authorization: $MODRINTH_TOKEN" \
+              -H "User-Agent: $GITHUB_REPOSITORY" \
+              -F "data=$data" \
+              -F "file=@$jar"
+          done
