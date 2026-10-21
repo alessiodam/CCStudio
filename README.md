@@ -18,7 +18,11 @@ Type `code` on a computer (or turtle, or pocket computer). The mod prints a link
 
 - One of:
   - Minecraft 1.21.1, NeoForge 21.1.264+, CC: Tweaked 1.120.2+
+  - Minecraft 1.21.4, NeoForge 21.4.161+, CC: Tweaked 1.115.1+
+  - Minecraft 1.21.7, NeoForge 21.7.25-beta+, CC: Tweaked 1.116.1+
+  - Minecraft 1.21.8, NeoForge 21.8.57+, CC: Tweaked 1.116.1+
   - Minecraft 1.21.11, NeoForge 21.11.48+, CC: Tweaked 1.117.1+
+  - Minecraft 26.1.2, NeoForge 26.1.2.122+, CC: Tweaked 1.120.0+
   - Minecraft 26.2, NeoForge 26.2.0.93+, CC: Tweaked 1.120.2+
 - The server needs internet access once. It downloads the official VS Code Web build (about 53 MB), checks its SHA-256 and caches it in `<game dir>/ccstudio/vscode-web`.
 - Only the server needs the mod. Clients without it can still join.
