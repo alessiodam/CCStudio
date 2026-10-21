@@ -45,6 +45,7 @@ jobs:
           MODRINTH_PROJECT: dL1sDnKD
           CC_TWEAKED_PROJECT: gu7yAYhd
         run: |
+          set -o pipefail
           version="${GITHUB_REF_NAME#v}"
           existing="$(curl --fail-with-body -sS "https://api.modrinth.com/v2/project/$MODRINTH_PROJECT/version" \
             -H "Authorization: $MODRINTH_TOKEN" \
