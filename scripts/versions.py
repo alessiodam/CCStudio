@@ -40,7 +40,7 @@ def maven_versions(url):
 def version_key(version):
     parts = re.split(r"[.\-+]", version)
     key = [(0, int(part)) if part.isdigit() else (-1, part) for part in parts]
-    stable = 0 if re.search(r"(alpha|beta|rc|pre)", version) else 1
+    stable = 0 if re.search(r"(alpha|beta|rc|pre|snapshot|nightly)", version, re.I) else 1
     return key, stable
 
 
