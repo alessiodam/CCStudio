@@ -46,8 +46,15 @@ jobs:
           CC_TWEAKED_PROJECT: gu7yAYhd
         run: |
           version="${GITHUB_REF_NAME#v}"
+          existing="$(curl --fail-with-body -sS "https://api.modrinth.com/v2/project/$MODRINTH_PROJECT/version" \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -H "User-Agent: $GITHUB_REPOSITORY" | jq -r '.[].version_number')"
           for platform in platforms/*/; do
             minecraft="$(grep '^minecraft_version=' "$platform/gradle.properties" | cut -d= -f2)"
+            if grep -qxF "$version+$minecraft" <<< "$existing"; then
+              echo "$version+$minecraft is already on Modrinth"
+              continue
+            fi
             jar="$(ls "$platform"build/libs/*.jar)"
             data="$(jq -n \
               --arg project "$MODRINTH_PROJECT" \
